@@ -29,12 +29,8 @@ public class Main extends Application {
         Label outputField = new Label("");
         outputBox.setAlignment(Pos.BASELINE_RIGHT);
         Label operationsField = new Label("Operations label");
-        Button button = new Button("1");
-        Button clearBtn = new Button("C");
 
-        button.setOnAction(event -> {
-            outputField.setText(outputField.getText() + "1");
-        });
+        Button clearBtn = new Button("C");
 
         clearBtn.setOnAction(event -> {
             outputField.setText("");
@@ -47,7 +43,58 @@ public class Main extends Application {
 
         outputBox.getChildren().addAll(operationsField, outputField);
         buttonGrid.add(clearBtn, 0, 0);
-        buttonGrid.add(button, 0, 1);
+
+        //        Button button = new Button("1");
+//        button.setOnAction(event -> {
+//            outputField.setText(outputField.getText() + "1");
+//        });
+//        buttonGrid.add(button, 0, 1);
+
+        int startInt = 7;
+        for (int i = 0; i < 3; i++) {
+            String btnText = String.valueOf(i + startInt);
+        // System.out.println("button text = " + btnText);
+            Button numberButton = new Button(btnText);
+            numberButton.setOnAction(event -> {
+                outputField.setText(outputField.getText() + btnText);
+            });
+            buttonGrid.add(numberButton, i, 1);
+        }
+
+        startInt = 4;
+        for (int i = 0; i < 3; i++) {
+            String btnText = String.valueOf(i + startInt);
+            // System.out.println("button text = " + btnText);
+            Button numberButton = new Button(btnText);
+            numberButton.setOnAction(event -> {
+                outputField.setText(outputField.getText() + btnText);
+            });
+            buttonGrid.add(numberButton, i, 2);
+        }
+
+        startInt = 1;
+        for (int i = 0; i < 3; i++) {
+            String btnText = String.valueOf(i + startInt);
+            // System.out.println("button text = " + btnText);
+            Button numberButton = new Button(btnText);
+            numberButton.setOnAction(event -> {
+                outputField.setText(outputField.getText() + btnText);
+            });
+            buttonGrid.add(numberButton, i, 3);
+        }
+
+        Button zeroBtn = new Button("0");
+        zeroBtn.setOnAction(event -> {
+            outputField.setText(outputField.getText() + "0");
+        });
+        zeroBtn.setMaxWidth(Double.MAX_VALUE);
+        buttonGrid.add(zeroBtn, 0, 4, 2, 1);
+
+        Button decimalBtn = new Button(" .");
+        decimalBtn.setOnAction(event -> {
+            outputField.setText(outputField.getText() + ".");
+        });
+        buttonGrid.add(decimalBtn, 2, 4);
 
         root.getChildren().addAll(outputBox, buttonGrid);
 
