@@ -30,15 +30,24 @@ public class Main extends Application {
         outputBox.setAlignment(Pos.BASELINE_RIGHT);
         Label operationsField = new Label("Operations label");
         Button button = new Button("1");
+        Button clearBtn = new Button("C");
 
         button.setOnAction(event -> {
             outputField.setText(outputField.getText() + "1");
         });
 
+        clearBtn.setOnAction(event -> {
+            outputField.setText("");
+        });
+
         GridPane buttonGrid = new GridPane();
+        buttonGrid.setPadding(new Insets(10, 10, 10, 10));
+        buttonGrid.setHgap(10);
+        buttonGrid.setVgap(10);
 
         outputBox.getChildren().addAll(operationsField, outputField);
-        buttonGrid.add(button, 0, 0);
+        buttonGrid.add(clearBtn, 0, 0);
+        buttonGrid.add(button, 0, 1);
 
         root.getChildren().addAll(outputBox, buttonGrid);
 
