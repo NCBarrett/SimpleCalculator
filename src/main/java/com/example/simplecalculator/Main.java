@@ -11,7 +11,10 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.Locale;
 
 public class Main extends Application {
 
@@ -26,20 +29,45 @@ public class Main extends Application {
         outputBox.setPadding(new Insets(10));
         outputBox.setAlignment(Pos.BASELINE_RIGHT);
 
-        //Maybe add a string to capture number as it grows and changes?
-
         Label outputField = new Label("");
         Label operationsField = new Label("Operations label");
-        Button button = new Button("1");
+        Button buttonOne = new Button("1");
+        Button buttonPoint = new Button(" .");
         Button clearBtn = new Button("C");
 
         // Create a formatter
-        NumberFormat numberFormat = NumberFormat.getNumberInstance();
+        NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.US);
+        numberFormat.setMaximumFractionDigits(15);
 
-        button.setOnAction(event -> {
-            String safeNumber = outputField.getText().replaceAll(",", "");
-            long number = Long.parseLong(safeNumber + "1");
-            outputField.setText(numberFormat.format(number));
+        buttonOne.setOnAction(event -> {
+
+            if (outputField.getText().isEmpty() || outputField.getText() == null) { // watch for a blank outputField
+                outputField.setText(outputField.getText() + "1");
+            } else if (outputField.getText().endsWith(".")) {  // no numbers after the decimal point
+                //System.out.println("no numbers after the decimal point");
+                String safeNumber = outputField.getText().replaceAll(",", "");
+                safeNumber = safeNumber.replace(".", "");
+                long number = Long.parseLong(safeNumber);
+                outputField.setText(numberFormat.format(number) + ".1");
+            } else if (!outputField.getText().contains(".")) { // no decimal point
+                //System.out.println("no decimal point");
+                String safeNumber = outputField.getText().replaceAll(",", "");
+                long number = Long.parseLong(safeNumber + 1);
+                outputField.setText(numberFormat.format(number));
+            } else { // (implied) *any* numbers after the decimal point
+                //System.out.println("(implied) *any* numbers after the decimal point");
+                String safeNumber = outputField.getText().replaceAll(",", "");
+                BigDecimal number = new BigDecimal(safeNumber + 1);
+                outputField.setText(numberFormat.format(number));
+            }
+        });
+
+        buttonPoint.setOnAction(event -> {
+            if (!outputField.getText().contains(".")) {
+                String safeNumber = outputField.getText().replaceAll(",", "");
+                long number = Long.parseLong(safeNumber);
+                outputField.setText(numberFormat.format(number) + ".");
+            }
         });
 
         clearBtn.setOnAction(event -> {
@@ -53,7 +81,8 @@ public class Main extends Application {
 
         outputBox.getChildren().addAll(operationsField, outputField);
         buttonGrid.add(clearBtn, 0, 0);
-        buttonGrid.add(button, 0, 1);
+        buttonGrid.add(buttonOne, 0, 1);
+        buttonGrid.add(buttonPoint, 1, 2);
 
         root.getChildren().addAll(outputBox, buttonGrid);
 
@@ -62,6 +91,7 @@ public class Main extends Application {
         primaryStage.setTitle("Calculator");
         primaryStage.show();
     }
+
 
     //    public boolean operationComplete(String input) {
 //
