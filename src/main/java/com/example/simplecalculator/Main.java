@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
@@ -47,17 +48,22 @@ public class Main extends Application {
         zeroBtn.setMaxWidth(Double.MAX_VALUE);
 
         NumberFormat numberFormat = NumberFormat.getInstance(Locale.US);
+        numberFormat.setMaximumFractionDigits(16);
 
         buttonOne.setOnAction(event -> {
 
             if (outputField.getText().isEmpty() || operationsField.getText() == null) { // outputField is empty
                 outputField.setText("1");
             } else if (!outputField.getText().contains(".")) { // outputField contains no decimal
-
-                long safeNumber =  Long.parseLong(outputField.getText());
-                outputField.setText(numberFormat.format(safeNumber) + "1");
+                String number = outputField.getText().replace(",", "");
+                number = number + "1";
+                //long safeNumber =  Long.parseLong(outputField.getText());
+                //outputField.setText(numberFormat.format(safeNumber) + "1");
+                long safeNumber = Long.parseLong(number);
+                outputField.setText(numberFormat.format(safeNumber));
             } else if (outputField.getText().endsWith(".")) { // outputField contains only a decimal point
                 String safeNumber = outputField.getText().replace(",", "");
+                safeNumber = safeNumber.replace(".", "") ;
                 long safeNumberLong = Long.parseLong(safeNumber);
                 outputField.setText(numberFormat.format(safeNumberLong) + ".1");
             } else { // outputField has a decimal and trailing numbers
@@ -69,7 +75,8 @@ public class Main extends Application {
 
         decimalBtn.setOnAction(event -> {
             if (!outputField.getText().contains(".")) {
-                long safeNumber =  Long.parseLong(outputField.getText());
+                String number = outputField.getText().replace(",", "");
+                long safeNumber =  Long.parseLong(number);
                 outputField.setText(numberFormat.format(safeNumber) + ".");
             }
         });
@@ -77,6 +84,7 @@ public class Main extends Application {
         clearBtn.setOnAction(event -> {
             outputField.setText("");
         });
+
         buttonGrid.add(clearBtn, 0, 0);
         buttonGrid.add(buttonOne, 0, 1);
         buttonGrid.add(zeroBtn, 0, 4, 2, 1);
