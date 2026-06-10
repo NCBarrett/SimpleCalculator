@@ -50,15 +50,13 @@ public class Main extends Application {
         NumberFormat numberFormat = NumberFormat.getInstance(Locale.US);
         numberFormat.setMaximumFractionDigits(16);
 
-        buttonOne.setOnAction(event -> {
 
+        buttonOne.setOnAction(event -> {
             if (outputField.getText().isEmpty() || operationsField.getText() == null) { // outputField is empty
                 outputField.setText("1");
             } else if (!outputField.getText().contains(".")) { // outputField contains no decimal
                 String number = outputField.getText().replace(",", "");
                 number = number + "1";
-                //long safeNumber =  Long.parseLong(outputField.getText());
-                //outputField.setText(numberFormat.format(safeNumber) + "1");
                 long safeNumber = Long.parseLong(number);
                 outputField.setText(numberFormat.format(safeNumber));
             } else if (outputField.getText().endsWith(".")) { // outputField contains only a decimal point
