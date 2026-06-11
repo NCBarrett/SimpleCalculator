@@ -50,6 +50,7 @@ dependencies {
     }
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
+    implementation("net.objecthunter:exp4j:0.4.8")
 }
 
 tasks.withType<Test> {

@@ -11,6 +11,8 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import net.objecthunter.exp4j.Expression;
+import net.objecthunter.exp4j.ExpressionBuilder;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -21,6 +23,9 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws IOException {
+
+        StringBuilder mathString = new StringBuilder();
+        //Expression expression = new Expression(mathString);
 
         // Define VBox border
         BorderStroke stroke = new BorderStroke(
@@ -39,7 +44,7 @@ public class Main extends Application {
 
         Label outputField = new Label("");
         outputBox.setAlignment(Pos.BASELINE_RIGHT);
-        Label operationsField = new Label("Operations label");
+        Label operationsField = new Label("");
 
         GridPane buttonGrid = new GridPane();
         buttonGrid.setPadding(new Insets(10, 10, 10, 10));
@@ -53,6 +58,10 @@ public class Main extends Application {
         Button decimalBtn = new Button(" .");
         Button equalsBtn = new Button("=");
         Button backspaceBtn = new Button("->");
+        Button plusBtn = new Button("+");
+        Button minusBtn = new Button("-");
+        Button timesBtn = new Button("*");
+        Button divideBtn = new Button("/");
 
         // Setup button styling
         clearBtn.setFont(new Font("arial", 20));
@@ -61,30 +70,34 @@ public class Main extends Application {
         zeroBtn.setMaxWidth(Double.MAX_VALUE);
         backspaceBtn.setFont(new Font("arial", 20));
         equalsBtn.setFont(new Font("arial", 20));
+        plusBtn.setFont(new Font("arial", 20));
 
         // Set up formatting for decimals
         NumberFormat numberFormat = NumberFormat.getInstance(Locale.US);
         numberFormat.setMaximumFractionDigits(16);
 
+        // Loop to set up number buttons except zero
 //        int startInt = 7;
-        int rowIdx = 1;
+        int rowIdx = 2;
         for (int startInt = 7; startInt > 0; startInt = startInt - 3) {
             for (int colIdx = 0; colIdx < 3; colIdx++) {
                 String btnText = String.valueOf(colIdx + startInt);
                 Button numberBtn = new Button(btnText);
                 numberBtn.setFont(new Font("arial", 20));
                 numberBtn.setOnAction(event -> {
-                    addNumberToField(outputField, btnText, numberFormat);
+                    addNumberToField(outputField, operationsField, btnText, numberFormat, mathString.toString());
                 });
                 buttonGrid.add(numberBtn, colIdx, rowIdx);
             }
             rowIdx++;
         }
 
+        // Setup zero button
         zeroBtn.setOnAction(event -> {
             outputField.setText(outputField.getText() + "0");
         });
 
+        // Setup decimal button
         decimalBtn.setOnAction(event -> {
 //            System.out.println("outputField.getText() = " + outputField.getText());
             if (!outputField.getText().contains(".")) {
@@ -97,9 +110,10 @@ public class Main extends Application {
             }*/
         });
 
+        // Setup clear button
         clearBtn.setOnAction(event -> {
             outputField.setText("");
-            System.out.println("\n");
+//            System.out.println("\n");
         });
 
         backspaceBtn.setOnAction(event -> {
@@ -109,13 +123,35 @@ public class Main extends Application {
             }
         });
 
-        equalsBtn.setOnAction(event -> {
-
+        plusBtn.setOnAction(event -> {
+            if (!(mathString.toString().endsWith("[-*/+]s?"))) {
+                mathString.append(" + ");
+                outputField.setText(mathString.toString());
+            }
         });
 
+        timesBtn.setOnAction(event -> {
+//            if () {
+//
+//            }
+        });
+
+        equalsBtn.setOnAction(event -> {
+            if ((mathString.toString().endsWith("s?[(0-9)|)]s?"))) {
+                String math = mathString.toString();
+                Expression expression = new ExpressionBuilder(math).build();
+                outputField.setText(String.valueOf(expression.evaluate()));
+            }
+        });
+
+        // Add interface buttons to UI component
         buttonGrid.add(clearBtn, 0, 0);
         buttonGrid.add(backspaceBtn, 1, 0);
         buttonGrid.add(equalsBtn, 2, 0);
+        buttonGrid.add(plusBtn, 0, 1);
+        buttonGrid.add(timesBtn, 1, 1);
+        buttonGrid.add(divideBtn, 2, 1);
+        buttonGrid.add(minusBtn, 3, 1);
         buttonGrid.add(zeroBtn, 0, 4, 2, 1);
         buttonGrid.add(decimalBtn, 2, 4);
 
@@ -128,19 +164,26 @@ public class Main extends Application {
         primaryStage.show();
     }
 
-    private static void addNumberToField(Label outputField, String btnText, NumberFormat numberFormat) {
+    private static void addNumberToField(Label outputField, Label operationsField, String btnText,
+                                         NumberFormat numberFormat, String mathString) {
+        String output = "";
+
         if (outputField.getText().isEmpty() || outputField.getText() == null) { // outputField is empty
             outputField.setText(btnText);
         } else if (!outputField.getText().contains(".")) { // outputField contains no decimal
             String number = outputField.getText().replace(",", "");
             number = number + btnText;
             long safeNumber = Long.parseLong(number);
-            outputField.setText(numberFormat.format(safeNumber));
+            output = numberFormat.format(safeNumber);
+            outputField.setText(output);
+            operationsField.setText(operationsField.getText() + output);
         } else if (outputField.getText().endsWith(".")) { // outputField contains only a decimal point
             String safeNumber = outputField.getText().replace(",", "");
             safeNumber = safeNumber.replace(".", "") ;
             long safeNumberLong = Long.parseLong(safeNumber);
-            outputField.setText(numberFormat.format(safeNumberLong) + "." + btnText);
+            output = numberFormat.format(safeNumberLong) + "." + btnText;
+            outputField.setText(output);
+            operationsField.setText(operationsField.getText() + output);;
         } else { // outputField has a decimal and trailing numbers
             String safeNumber = outputField.getText().replace(",", "");
 //            System.out.println("safeNumber = " + safeNumber);
@@ -148,7 +191,9 @@ public class Main extends Application {
 //            System.out.println("safeNumberBigDecimal = " + safeNumberBigDecimal + "; btnText = " + btnText);
 //            System.out.println("numberFormat.format(safeNumberBigDecimal) = " +
 //                    numberFormat.format(safeNumberBigDecimal));
-            outputField.setText(numberFormat.format(safeNumberBigDecimal) + btnText);
+            output = numberFormat.format(safeNumberBigDecimal) + btnText;
+            outputField.setText(output);
+            operationsField.setText(operationsField.getText() + output);;
         }
     }
 }
