@@ -93,7 +93,8 @@ public class Main extends Application {
                 Button numberBtn = new Button(btnText);
                 numberBtn.setFont(new Font("arial", 20));
                 numberBtn.setOnAction(event -> {
-                    addNumberToField(outputField, operationsField, btnText, numberFormat);
+                    addNumberToField(outputField, operationsField, btnText,
+                            numberFormat, mathString);
                 });
                 buttonGrid.add(numberBtn, colIdx, rowIdx);
             }
@@ -122,7 +123,8 @@ public class Main extends Application {
         clearBtn.setOnAction(event -> {
             outputField.setText("");
             operationsField.setText("");
-//            System.out.println("\n");
+            mathString.setLength(0);
+            System.out.println("mathString: " + mathString.toString() + "\n");
         });
 
         backspaceBtn.setOnAction(event -> {
@@ -135,10 +137,18 @@ public class Main extends Application {
         });
 
         plusBtn.setOnAction(event -> {
-            if (!(mathString.toString().endsWith("[-*/+]s?"))) {
-                mathString.append(" + ");
-                operationsField.setText(mathString.toString());
+
+            System.out.println("mathString = " + mathString);
+            if (!mathString.isEmpty()) {
+                System.out.println("mathString is empty");
+                if (!(mathString.toString().endsWith("[-*/+]s?"))) {
+                    System.out.println("mathString.toString() = " + mathString.toString());
+                    mathString.append(" + ");
+                    System.out.println("mathString.toString() = " + mathString.toString());
+                    operationsField.setText(mathString.toString());
+                }
             }
+
         });
 
         timesBtn.setOnAction(event -> {
@@ -195,68 +205,30 @@ public class Main extends Application {
     }
 
     private static void addNumberToField(Label outputField, Label operationsField, String btnText,
-                                         NumberFormat numberFormat) {
+                                         NumberFormat numberFormat, StringBuilder builder) {
         String output = "";
         if (outputField.getText().isEmpty() || outputField.getText() == null) { // outputField is empty
             outputField.setText(btnText);
+            builder.append(btnText);
+            System.out.println("builder = " + builder.toString());
         } else {
             String number = outputField.getText().replace(",", "");
             if (!outputField.getText().contains(".")) { // outputField contains no decimal
                 number = number + btnText;
                 long safeNumber = Long.parseLong(number);
                 output = numberFormat.format(safeNumber);
-                outputField.setText(output);
             } else if (outputField.getText().endsWith(".")) { // outputField contains only a decimal point
                 number = number.replace(".", "");
                 long safeNumberLong = Long.parseLong(number);
                 output = numberFormat.format(safeNumberLong) + "." + btnText;
-                outputField.setText(output);
             } else { // outputField has a decimal and trailing numbers
                 number = number + btnText;
                 BigDecimal safeNumberBigDecimal = new BigDecimal(number);
                 output = numberFormat.format(safeNumberBigDecimal);
-                outputField.setText(output);
             }
+            outputField.setText(output);
+            builder.append(btnText);
+            System.out.println("builder = " + builder.toString());
         }
     }
 }
-
-
-//    public boolean operationComplete(String input) {
-//
-//        return input.matches(".*\\d$");
-//    }
-//        int startInt = 7;
-//        for (int colIdx = 0; colIdx < 3; colIdx++) {
-//            String btnText = String.valueOf(colIdx + startInt);
-//            System.out.println(colIdx + " + " + startInt + " = " + btnText);
-//            Button numberButton = new Button(btnText);
-//            numberButton.setOnAction(event -> {
-//                addNumberToField(outputField, btnText, numberFormat);
-//            });
-//            buttonGrid.add(numberButton, colIdx, 1);
-//        }
-//
-//        startInt = 4;
-//        for (int colIdx = 0; colIdx < 3; colIdx++) {
-//            String btnText = String.valueOf(colIdx + startInt);
-//            // System.out.println("button text = " + btnText);
-//            Button numberButton = new Button(btnText);
-//            numberButton.setOnAction(event -> {
-//               //outputField.setText(outputField.getText() + btnText);
-//                addNumberToField(outputField, btnText, numberFormat);
-//            });
-//            buttonGrid.add(numberButton, colIdx, 2);
-//        }
-//
-//        startInt = 1;
-//        for (int colIdx = 0; colIdx < 3; colIdx++) {
-//            String btnText = String.valueOf(colIdx + startInt);
-//            // System.out.println("button text = " + btnText);
-//            Button numberButton = new Button(btnText);
-//            numberButton.setOnAction(event -> {
-//               //outputField.setText(outputField.getText() + btnText);
-//                addNumberToField(outputField, btnText, numberFormat);
-//            });
-//            buttonGrid.add(numberButton, colIdx, 3);
-//        }
