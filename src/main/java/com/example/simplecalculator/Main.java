@@ -138,13 +138,13 @@ public class Main extends Application {
 
         plusBtn.setOnAction(event -> {
 
-            System.out.println("mathString = " + mathString);
+            //System.out.println("mathString = " + mathString);
             if (!mathString.isEmpty()) {
-                System.out.println("mathString is empty");
+                //System.out.println("mathString is empty");
                 if (!(mathString.toString().endsWith("[-*/+]s?"))) {
-                    System.out.println("mathString.toString() = " + mathString.toString());
+                    //System.out.println("mathString.toString() = " + mathString.toString());
                     mathString.append(" + ");
-                    System.out.println("mathString.toString() = " + mathString.toString());
+                    //System.out.println("mathString.toString() = " + mathString.toString());
                     operationsField.setText(mathString.toString());
                 }
             }
@@ -206,12 +206,20 @@ public class Main extends Application {
 
     private static void addNumberToField(Label outputField, Label operationsField, String btnText,
                                          NumberFormat numberFormat, StringBuilder builder) {
+        /* THREE CONDITIONS
+         * 1) the operationsField is empty
+         * 2) the operationsField ends in a math operator
+         * 3) the operationsField ends in a number
+         */
         String output = "";
-        if (outputField.getText().isEmpty() || outputField.getText() == null) { // outputField is empty
+        if (operationsField.getText() != null || operationsField.getText().isEmpty()) { // operationsField is empty
             outputField.setText(btnText);
             builder.append(btnText);
-            System.out.println("builder = " + builder.toString());
-        } else {
+            //System.out.println("builder = " + builder.toString();
+        } else if (operationsField.getText().endsWith("\\d+ [+\\-*/] ")) { // the operationsField ends in a math operator
+            outputField.setText(btnText);
+            builder.append(btnText);
+        } else { // the operationsField ends in a number
             String number = outputField.getText().replace(",", "");
             if (!outputField.getText().contains(".")) { // outputField contains no decimal
                 number = number + btnText;
@@ -228,7 +236,7 @@ public class Main extends Application {
             }
             outputField.setText(output);
             builder.append(btnText);
-            System.out.println("builder = " + builder.toString());
+            //System.out.println("builder = " + builder.toString());
         }
     }
 }
