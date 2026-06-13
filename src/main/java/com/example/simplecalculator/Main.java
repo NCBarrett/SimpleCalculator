@@ -14,6 +14,7 @@ import javafx.stage.Stage;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 
+import java.awt.desktop.OpenURIEvent;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
@@ -24,9 +25,8 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws IOException {
 
-        StringBuilder mathString = new StringBuilder();
-        //String exprString = "";
-        //Expression expression = new Expression(mathString);
+        StringBuilder mathBuilder = new StringBuilder();
+        // Expression expression = new Expression(mathBuilder);
 
         // Define VBox border
         BorderStroke stroke = new BorderStroke(
@@ -94,7 +94,7 @@ public class Main extends Application {
                 numberBtn.setFont(new Font("arial", 20));
                 numberBtn.setOnAction(event -> {
                     addNumberToField(outputField, operationsField, btnText,
-                            numberFormat, mathString);
+                            numberFormat, mathBuilder);
                 });
                 buttonGrid.add(numberBtn, colIdx, rowIdx);
             }
@@ -123,8 +123,8 @@ public class Main extends Application {
         clearBtn.setOnAction(event -> {
             outputField.setText("");
             operationsField.setText("");
-            mathString.setLength(0);
-            System.out.println("mathString: " + mathString.toString() + "\n");
+            mathBuilder.setLength(0);
+            System.out.println("mathBuilder: " + mathBuilder.toString() + "\n");
         });
 
         backspaceBtn.setOnAction(event -> {
@@ -136,39 +136,82 @@ public class Main extends Application {
             }
         });
 
+        // we start a new number and put it only in outputField
+        // we'll add the new number to builder only if the equalsBtn or an operation button is clicked
+        // StringBuilder is the better option for catenating new pieces of a string, but String is required
+        // for using ExpressionBuilder
         plusBtn.setOnAction(event -> {
+            //System.out.println("mathBuilder = " + mathBuilder);
 
-            //System.out.println("mathString = " + mathString);
-            if (!mathString.isEmpty()) {
-                //System.out.println("mathString is empty");
-                if (!(mathString.toString().endsWith("[-*/+]s?"))) {
-                    //System.out.println("mathString.toString() = " + mathString.toString());
-                    mathString.append(" + ");
-                    //System.out.println("mathString.toString() = " + mathString.toString());
-                    operationsField.setText(mathString.toString());
+            /** THREE OPTIONS
+            * 1) operationsField ends in +-/* and number
+            * 2) operationsField ends in number alone
+            * 3) operationsField ends in +-/*
+             */
+
+            String output ="";
+            // -OR- operationsField.getText().endsWith("\\d+")
+            if (operationsField.getText().endsWith("\\d$")) { // operationsField ends in a number
+                if (operationsField.getText().contains(".")) {
+                    Expression math = new ExpressionBuilder(operationsField.getText()).build();
+                    BigDecimal numberBigDecimal = new BigDecimal(math.evaluate());
+                    outputField.setText(numberFormat.format(numberBigDecimal));
+                } else {
+                    Expression math = new ExpressionBuilder(operationsField.getText()).build();
+                    long numberLong = Long.parseLong(math.toString());
+                    outputField.setText(numberFormat.format(numberLong));
                 }
+
+                operationsField.setText(operationsField.getText() + " + ");
+
+            } else { // operationsField is empty or ends in a math operation
+                // we start a new number, put it in outputField
+                // we'll add the new number to builder only if the equalsBtn or some operation button is clicked
+
             }
 
+            // if the operationsField has nothing in it
+            if (operationsField.getText() == null || operationsField.getText().isEmpty()) {
+                //System.out.println("mathBuilder is empty");
+                operationsField.setText(mathBuilder.toString());
+            } else {
+                // if the math string ends in a math operator and space
+                if (operationsField.getText().endsWith("[+\\-*/=] ")) {
+                    operationsField.setText(mathBuilder.toString());
+                }
+
+                // if the math string ends in a number
+                if (operationsField.getText().endsWith("\\d+")) {
+
+                }
+
+                if (!(mathBuilder.toString().endsWith("[-*/+]s?"))) {
+                    //System.out.println("mathBuilder.toString() = " + mathBuilder.toString());
+                    mathBuilder.append(" + ");
+                    //System.out.println("mathBuilder.toString() = " + mathBuilder.toString());
+                    operationsField.setText(mathBuilder.toString());
+                }
+            }
         });
 
         timesBtn.setOnAction(event -> {
-            if (!(mathString.toString().endsWith("[-*/+]s?"))) {
-                mathString.append(" * ");
-                operationsField.setText(mathString.toString());
+            if (!(mathBuilder.toString().endsWith("[-*/+]s?"))) {
+                mathBuilder.append(" * ");
+                operationsField.setText(mathBuilder.toString());
             }
         });
 
         minusBtn.setOnAction(event -> {
-            if (!(mathString.toString().endsWith("[-*/+]s?"))) {
-                mathString.append(" - ");
-                operationsField.setText(mathString.toString());
+            if (!(mathBuilder.toString().endsWith("[-*/+]s?"))) {
+                mathBuilder.append(" - ");
+                operationsField.setText(mathBuilder.toString());
             }
         });
 
         divideBtn.setOnAction(event -> {
-            if (!(mathString.toString().endsWith("[-*/+]s?"))) {
-                mathString.append(" / ");
-                operationsField.setText(mathString.toString());
+            if (!(mathBuilder.toString().endsWith("[-*/+]s?"))) {
+                mathBuilder.append(" / ");
+                operationsField.setText(mathBuilder.toString());
             }
         });
 
@@ -177,8 +220,8 @@ public class Main extends Application {
         });
 
         equalsBtn.setOnAction(event -> {
-            if ((mathString.toString().endsWith("s?[(0-9)|)]s?"))) {
-                String math = mathString.toString();
+            if ((mathBuilder.toString().endsWith("s?[(0-9)|)]s?"))) {
+                String math = mathBuilder.toString();
                 Expression expression = new ExpressionBuilder(math).build();
                 outputField.setText(String.valueOf(expression.evaluate()));
             }
@@ -206,37 +249,53 @@ public class Main extends Application {
 
     private static void addNumberToField(Label outputField, Label operationsField, String btnText,
                                          NumberFormat numberFormat, StringBuilder builder) {
-        /* THREE CONDITIONS
-         * 1) the operationsField is empty
-         * 2) the operationsField ends in a math operator
-         * 3) the operationsField ends in a number
-         */
+        // StringBuilder is the better option for catenating new pieces of a string, but String is required
+        // for using ExpressionBuilder
         String output = "";
-        if (operationsField.getText() != null || operationsField.getText().isEmpty()) { // operationsField is empty
-            outputField.setText(btnText);
-            builder.append(btnText);
-            //System.out.println("builder = " + builder.toString();
-        } else if (operationsField.getText().endsWith("\\d+ [+\\-*/] ")) { // the operationsField ends in a math operator
-            outputField.setText(btnText);
-            builder.append(btnText);
-        } else { // the operationsField ends in a number
-            String number = outputField.getText().replace(",", "");
-            if (!outputField.getText().contains(".")) { // outputField contains no decimal
-                number = number + btnText;
-                long safeNumber = Long.parseLong(number);
-                output = numberFormat.format(safeNumber);
-            } else if (outputField.getText().endsWith(".")) { // outputField contains only a decimal point
-                number = number.replace(".", "");
-                long safeNumberLong = Long.parseLong(number);
-                output = numberFormat.format(safeNumberLong) + "." + btnText;
-            } else { // outputField has a decimal and trailing numbers
-                number = number + btnText;
-                BigDecimal safeNumberBigDecimal = new BigDecimal(number);
-                output = numberFormat.format(safeNumberBigDecimal);
-            }
-            outputField.setText(output);
-            builder.append(btnText);
-            //System.out.println("builder = " + builder.toString());
+        String number = outputField.getText().replace(",", "");
+        if (!outputField.getText().contains(".")) { // outputField contains no decimal
+            number = number + btnText;
+            long safeNumber = Long.parseLong(number);
+            output = numberFormat.format(safeNumber);
+        } else if (outputField.getText().endsWith(".")) { // outputField contains only a decimal point
+            number = number.replace(".", "");
+            long safeNumberLong = Long.parseLong(number);
+            output = numberFormat.format(safeNumberLong) + "." + btnText;
+        } else { // outputField has a decimal and trailing numbers
+            number = number + btnText;
+            BigDecimal safeNumberBigDecimal = new BigDecimal(number);
+            output = numberFormat.format(safeNumberBigDecimal);
         }
+        outputField.setText(output);
     }
 }
+
+/**
+
+/** String output = "";
+        if (operationsField.getText() != null || operationsField.getText().isEmpty()) { // operationsField is empty
+        outputField.setText(btnText);
+            builder.append(btnText);
+//System.out.println("builder = " + builder.toString();
+        } else if (operationsField.getText().endsWith) { // operationsField ends in a math operator
+        outputField.setText(btnText);
+            builder.append(btnText);
+        } else { // operationsField ends in a number
+String number = outputField.getText().replace(",", "");
+            if (!outputField.getText().contains(".")) { // outputField contains no decimal
+number = number + btnText;
+long safeNumber = Long.parseLong(number);
+output = numberFormat.format(safeNumber);
+            } else if (outputField.getText().endsWith(".")) { // outputField contains only a decimal point
+number = number.replace(".", "");
+long safeNumberLong = Long.parseLong(number);
+output = numberFormat.format(safeNumberLong) + "." + btnText;
+            } else { // outputField has a decimal and trailing numbers
+number = number + btnText;
+BigDecimal safeNumberBigDecimal = new BigDecimal(number);
+output = numberFormat.format(safeNumberBigDecimal);
+            }
+                    outputField.setText(output);
+            builder.append(btnText);
+//System.out.println("builder = " + builder.toString());
+        } */
