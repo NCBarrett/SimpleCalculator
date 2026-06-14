@@ -14,6 +14,7 @@ public class Main extends Application {
 
     private TextField expressionField;
     private TextField resultField;
+    private StringBuilder number = new StringBuilder();
     private StringBuilder currentExpression = new StringBuilder();
 
     @Override
@@ -80,6 +81,7 @@ public class Main extends Application {
                 currentExpression.setLength(0);
                 expressionField.clear();
                 resultField.clear();
+                number.setLength(0);
                 break;
             case "<-":
                 if (!currentExpression.isEmpty()) {
@@ -88,12 +90,33 @@ public class Main extends Application {
                 }
                 break;
             case "=":
+                currentExpression.append(number.toString());
+                System.out.println("currentExpression = " + currentExpression.toString());
+                char lastChar = currentExpression.charAt(currentExpression.length() - 1);
+                if (lastChar == '+' || lastChar == '-' || lastChar == '*' || lastChar == '/') {
+                    System.out.println("currentExpression ends in a math op");
+                    currentExpression.deleteCharAt(currentExpression.length() - 1);
+                }
                 evaluateExpression();
+                expressionField.setText(currentExpression.toString());
+                number.setLength(0);
                 break;
             default:
-                currentExpression.append(command);
-
-                expressionField.setText(currentExpression.toString());
+                System.out.println("command = " + command);
+                System.out.println("currentExpression = " + currentExpression.toString());
+                if (command.matches("[-+*/]")) {
+                    System.out.println("Math op typed: " + command);
+                    currentExpression.append(number.toString());
+                    evaluateExpression();
+                    currentExpression.append(command);
+                    number.setLength(0);
+                    expressionField.setText(currentExpression.toString());
+                } else {
+                    System.out.println("Number typed: "  + command);
+                    number.append(command);
+                    resultField.setText(number.toString());
+                    expressionField.setText(currentExpression.toString());
+                }
                 break;
         }
     }
@@ -104,8 +127,10 @@ public class Main extends Application {
         try {
             String expStr = currentExpression.toString();
 
+            System.out.println("In evaluateExpression(); expStr = " + expStr);
             // exp4j doesn't implicitly handle leading operators or trailing dots gracefully
             // Basic validation can go here
+
             Expression exp = new ExpressionBuilder(expStr).build();
             double result = exp.evaluate();
 
